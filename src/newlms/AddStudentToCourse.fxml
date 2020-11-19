@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="newlms.AddStudentToCourseController">
+   <children>
+      <ImageView fitHeight="400.0" fitWidth="350.0">
+         <image>
+            <Image url="@images/popup-back.jpg" />
+         </image>
+      </ImageView>
+      <TextField fx:id="studentID" layoutX="135.0" layoutY="180.0" prefWidth="156.0" promptText="Enter Student ID" style="-fx-background-color: white; -fx-background-radius: 100;" AnchorPane.rightAnchor="59.0" />
+      <Text layoutX="51.64713541666668" layoutY="197.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Student ID" AnchorPane.rightAnchor="237.88411458333331">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Text>
+      <Button alignment="BASELINE_LEFT" layoutX="232.66666666666669" layoutY="324.0" mnemonicParsing="false" onAction="#addStudentToCourse" prefHeight="33.0" prefWidth="75.0" style="-fx-cursor: hand; -fx-background-radius: 100;" text="Add" textOverrun="CLIP" AnchorPane.bottomAnchor="42.666666666666686" AnchorPane.rightAnchor="42.0">
+         <font>
+            <Font name="Calibri Bold" size="14.0" />
+         </font>
+      </Button>
+      <Text fill="WHITE" layoutX="31.0" layoutY="75.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Add Student to Course" textAlignment="CENTER" wrappingWidth="285.47009658813477">
+         <font>
+            <Font name="Calibri Bold" size="28.0" />
+         </font>
+         <effect>
+            <DropShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+      </Text>
+      <Line endX="-19.42584228515625" endY="3.814697265625E-6" layoutX="357.00181897481286" layoutY="67.99999618530273" startX="-47.42584228515625" stroke="WHITE" strokeWidth="2.0" AnchorPane.rightAnchor="11.009810129801394" AnchorPane.topAnchor="66.58578264713287">
+         <effect>
+            <DropShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+      </Line>
+      <ImageView fitHeight="22.0" fitWidth="22.0" layoutX="276.0" layoutY="330.0" preserveRatio="true">
+         <image>
+            <Image url="@images/rightarrow.png" />
+         </image>
+      </ImageView>
+      <Button alignment="BASELINE_RIGHT" layoutX="42.0" layoutY="324.0" mnemonicParsing="false" onAction="#back" prefHeight="33.0" prefWidth="75.0" style="-fx-cursor: hand; -fx-background-radius: 100;" text="Back" textOverrun="CLIP" AnchorPane.bottomAnchor="42.666666666666686" AnchorPane.leftAnchor="42.0">
+         <font>
+            <Font name="Calibri Bold" size="14.0" />
+         </font>
+      </Button>
+      <ImageView fitHeight="22.0" fitWidth="22.0" layoutX="54.0" layoutY="330.0" preserveRatio="true">
+         <image>
+            <Image url="@images/leftarrow.png" />
+         </image>
+      </ImageView>
+      <Line endX="-19.42584228515625" endY="3.814697265625E-6" layoutX="58.840057373046875" layoutY="68.0" startX="-47.42584228515625" stroke="WHITE" strokeWidth="2.0" AnchorPane.leftAnchor="10.0">
+         <effect>
+            <DropShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+      </Line>
+   </children>
+</AnchorPane>

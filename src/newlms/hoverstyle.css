@@ -1,0 +1,24 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.mainFxmlClass {
+    
+    .button{
+        -fx-font-weight: regular;
+        -fx-font-size:14;       
+        -fx-background-color: hold;
+    }
+    
+    .button:hover{
+        -fx-background-color: #add8e6;
+        -fx-font-weight: bold;            
+    }
+    
+    .button:pressed{
+        -fx-background-color: #add8e6;
+        -fx-font-weight: bold;        
+    }
+
+    
+}
