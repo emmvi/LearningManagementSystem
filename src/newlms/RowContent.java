@@ -10,13 +10,15 @@ package newlms;
  * @author Dell
  */
 public class RowContent {
-    private String subject, author, date;
+    private String id, subject, author, date;
 
-    public RowContent(String subject, String author, String date) {
+    public RowContent(String id, String subject, String author, String date) {
+        this.id = id;
         this.subject = subject;
         this.author = author;
         this.date = date;
     }
+
 
     public String getSubject() {
         return subject;
@@ -43,6 +45,14 @@ public class RowContent {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
         
         

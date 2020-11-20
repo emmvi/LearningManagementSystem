@@ -356,7 +356,12 @@ public class AdminPagesController implements Initializable {
     }
     
     public void addStdentToCourse() throws IOException {
-        openPopupForm("AddStudentToCourse.fxml", 1);
+        if(this.selectedId != null ) {
+            openPopupForm("AddStudentToCourse.fxml", 1);
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Please select the course you want to add a student to");   
+        }
     }
     
     @FXML
@@ -371,6 +376,9 @@ public class AdminPagesController implements Initializable {
             else if(this.pageType.getText().equals("Teachers")) {
                 openPopupForm("EditTeacher.fxml", 4);
             }
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Please click the row you'd like to edit!");
         }
         
     }
@@ -445,6 +453,9 @@ public class AdminPagesController implements Initializable {
 
                 }
             }
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Please click the row you'd like to delete!");
         }
         
     }

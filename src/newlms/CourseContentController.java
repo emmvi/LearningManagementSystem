@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -29,9 +30,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -54,8 +57,10 @@ public class CourseContentController implements Initializable {
     String course_ID;
     String courseName;
     byte[] uploadedFileBytes;
+    private String selectedId;
     
-    
+    @FXML
+    private TableColumn<RowContent, String> idCol;
     @FXML
     private TableColumn<RowContent, String> subjectCol;
     @FXML
@@ -92,6 +97,8 @@ public class CourseContentController implements Initializable {
     private Button addButton;
     @FXML
     private Button downloadButton;
+    @FXML
+    private TextField subject;
     
     
     /**
@@ -99,7 +106,7 @@ public class CourseContentController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        this.contentTable.setOnMouseClicked(selectEvent);
        
     }    
     @FXML
@@ -162,14 +169,26 @@ public class CourseContentController implements Initializable {
     
     @FXML
     void add(ActionEvent event) {
-        System.out.print("Add clicked");
-        addContent();
+        System.out.println("Add clicked");
+        if(subject.getText() != null) {
+            addContent(subject.getText());
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Please Provide Subject");   
+        }
+        
     }
     
     @FXML
     void download(ActionEvent event) {
-        System.out.print("Download clicked");
-        downloadFile();
+        System.out.println("Download clicked");
+        if(this.selectedId != null) {
+            downloadFile();            
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Please click the content you'd like to download!");
+        }
+
     }
     
     
@@ -273,84 +292,47 @@ public class CourseContentController implements Initializable {
         else {
             addButton.setVisible(false);
         }
+        this.selectedId = null;
     }
     
     public void setContent(String type) {
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         subjectCol.setCellValueFactory(new PropertyValueFactory<>("subject"));
         authorCol.setCellValueFactory(new PropertyValueFactory<>("author"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
         contentTable.setItems(getContents(type));
     }
-    
-//    public ObservableList<RowContent> getContentsTeacher(String type) {
-//        
-//        return null;
-//    }
-    
-//    public ObservableList<RowContent> getContentsStudent(String type) {
-//        ObservableList<RowContent> announcements = FXCollections.observableArrayList();
-//        conn = ConnectToDB.connect();
-//        
-//        String contentQuery = null;
-//        if(type.equals("Dropbox")) {
-//            contentQuery = "?";
-//        }
-//        else {
-//            contentQuery = "Select Subject, Date_Modified, Name as Author from Content join Teacher using (Teacher_ID) where Course_ID=10";
-//        }
-//        try {
-//            
-//            pst = conn.prepareStatement(contentQuery);
-//            pst.setString(1, course_ID);
-//            if(type.equals("Dropbox") && this.userType.equals("Student")) {
-//                pst.setString(2, this.user_ID);
-//            }
-//            else {
-//                pst.setString(2, type); 
-//            }
-//            rs = pst.executeQuery();
-//            while(rs.next()) {
-//                announcements.add(new RowContent(rs.getString("Subject"), rs.getString("Author"), rs.getString("Date_Modified")));
-//            }
-//        }
-//        catch(Exception e) {
-//            e.printStackTrace();
-//            JOptionPane.showMessageDialog(null, e);
-//        }
-//        finally {
-//          try{
-//              rs.close();
-//              pst.close();
-//              conn.close();
-//          }  
-//          catch(Exception e) {      
-//          }
-//        }
-//        return announcements;
-//        
-//    }
  
     public ObservableList<RowContent> getContents(String type) {
         
-        ObservableList<RowContent> announcements = FXCollections.observableArrayList();
+        ObservableList<RowContent> rows = FXCollections.observableArrayList();
         conn = ConnectToDB.connect();
-        String contentQuery = "Select Subject, Date_Modified, Teacher_ID as id from Content where Course_ID=? and Content_Type=?";
-        if(type.equals("Dropbox")) {
-//            contentQuery = "Select Subject, Date_Modified, Name as Author from Content join Student using (Student_ID) where Course_ID=? and Student_ID=?";
-        }
+        String normalContentQuery = "SELECT Content_ID, Subject, Author, Date_Uploaded from Content where Course_ID=? and Content_Type=?";
+        String studentDropboxQuery = "SELECT Content_ID, Subject, Author, Date_Uploaded from Content where Course_ID=? and Content_Type=? and Student_ID=?";
+        
         try {
-            
-            pst = conn.prepareStatement(contentQuery);
-            pst.setString(1, course_ID);
             if(type.equals("Dropbox") && this.userType.equals("Student")) {
-                pst.setString(2, this.user_ID);
+                pst = conn.prepareStatement(studentDropboxQuery);
+                pst.setString(1, this.course_ID);
+                pst.setString(2, type);
+                pst.setString(3, this.user_ID);
+                
+                rs = pst.executeQuery();
+                while(rs.next()) {
+                    rows.add(new RowContent(rs.getString("Content_ID"), rs.getString("Subject"), rs.getString("Author"), rs.getString("Date_Uploaded")));
+                }
             }
             else {
-                pst.setString(2, type); 
-            }
-            rs = pst.executeQuery();
-            while(rs.next()) {
-                announcements.add(new RowContent(rs.getString("Subject"), this.userName.getText(), rs.getString("Date_Modified")));
+                pst = conn.prepareStatement(normalContentQuery);
+                pst.setString(1, this.course_ID);
+                pst.setString(2, type);
+                
+                
+                rs = pst.executeQuery();
+                while(rs.next()) {
+                    rows.add(new RowContent(rs.getString("Content_ID"), rs.getString("Subject"), rs.getString("Author"), rs.getString("Date_Uploaded")));
+                }
+
             }
         }
         catch(Exception e) {
@@ -366,7 +348,7 @@ public class CourseContentController implements Initializable {
           catch(Exception e) {      
           }
         }
-        return announcements;
+        return rows;
     }
     
     
@@ -387,7 +369,7 @@ public class CourseContentController implements Initializable {
     
     
     
-    public void addContent() {
+    public void addContent(String subject) {
 
         JFileChooser chooser = new JFileChooser();
         chooser.showOpenDialog(null);
@@ -412,24 +394,28 @@ public class CourseContentController implements Initializable {
 
 
         conn = ConnectToDB.connect();
-            String queryAddContent = "Insert into content (Content_ID, Content_Type, Course_ID, subject, File_Uploaded, Author) values (?,?,?,?,?,?)";
-//        String queryAddContent = "UPDATE Content SET File_Uploaded=? WHERE Content_ID=5";
-
+        String queryAddContent = null; 
+        if(this.userType.equals("Teacher")) {
+            queryAddContent = "Insert into Content (Content_Type, Course_ID, Subject, File_Uploaded, Teacher_ID, Author) values (?,?,?,?,?, ?)";
+        }
+        else {
+            queryAddContent = "Insert into Content (Content_Type, Course_ID, Subject, File_Uploaded, Student_ID, Author) values (?,?,?,?,?,?)";
+        }
+            
         try {
             pst = conn.prepareStatement(queryAddContent);
             System.out.println("Bytes Value: " + this.uploadedFileBytes);
-                pst.setString(1, "113");
-                pst.setString(2, "Dropbox");
-                pst.setString(3, "10");
-                pst.setString(4, "Trying with updated styling");
-                pst.setBytes(5, this.uploadedFileBytes);
-                pst.setString(5, this.user_ID);
+            
+            pst.setString(1, this.contentType.getText());
+            pst.setString(2, this.course_ID);
+            pst.setString(3, subject);
+            pst.setBytes(4, this.uploadedFileBytes);
+            pst.setString(5, this.user_ID);
+            pst.setString(6, this.userName.getText());
 
             pst.executeUpdate();
+            
             JOptionPane.showMessageDialog(null, "WOHOOOOOO! FILE UPLOADED");
-
-
-
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -448,8 +434,6 @@ public class CourseContentController implements Initializable {
     }
         
     
-    
-    
     void downloadFile() {
         byte[] fileBytes = null;
         conn = ConnectToDB.connect();
@@ -457,7 +441,7 @@ public class CourseContentController implements Initializable {
         
         try {
             pst = conn.prepareStatement(getFile);
-            pst.setString(1, "113");
+            pst.setString(1, this.selectedId);
             rs = pst.executeQuery();
             fileBytes = rs.getBytes("File_Uploaded");    
             
@@ -523,5 +507,24 @@ public class CourseContentController implements Initializable {
           }
         }
         
+    }
+    
+//    Add mouseEvent if a person clicks a row
+    EventHandler<MouseEvent> selectEvent = new EventHandler<MouseEvent>() { 
+        @Override
+        public void handle(MouseEvent event) {
+            if (event.getClickCount() > 0) {
+                setSelectedId();
+            }   
+        } 
+    };
+    
+    public void setSelectedId() {
+        if (this.contentTable.getSelectionModel().getSelectedItem() != null) {
+            RowContent selectedRow = this.contentTable.getSelectionModel().getSelectedItem();
+            this.selectedId = selectedRow.getId();
+            
+            System.out.println("ID SELECTED:" + selectedId);
+        }
     }
 }

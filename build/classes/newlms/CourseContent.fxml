@@ -167,9 +167,10 @@
          <children>
             <TableView fx:id="contentTable" editable="true" fixedCellSize="23.0" layoutX="-6.0" layoutY="53.0" prefHeight="290.0" prefWidth="682.0">
                <columns>
-                  <TableColumn fx:id="subjectCol" prefWidth="357.0" text="Subject" />
-                  <TableColumn fx:id="authorCol" prefWidth="166.0" text="Author" />
-                  <TableColumn fx:id="dateCol" prefWidth="167.0" text="Date" />
+                  <TableColumn fx:id="idCol" prefWidth="83.0" text="ID" />
+                  <TableColumn fx:id="subjectCol" prefWidth="246.0" text="Subject" />
+                  <TableColumn fx:id="authorCol" prefWidth="197.0" text="Author" />
+                  <TableColumn fx:id="dateCol" prefWidth="155.0" text="Date" />
                </columns>
             </TableView>
          </children>
@@ -228,7 +229,7 @@
             <Font name="Calibri" size="24.0" />
          </font>
       </Text>
-      <Button fx:id="addButton" layoutX="983.0" layoutY="586.0" mnemonicParsing="false" onAction="#add" prefHeight="44.0" prefWidth="82.0" style="-fx-border-width: 3; -fx-cursor: hand;" stylesheets="@hoverstyle.css" text="Add" textOverrun="CLIP">
+      <Button fx:id="addButton" layoutX="702.0" layoutY="586.0" mnemonicParsing="false" onAction="#add" prefHeight="44.0" prefWidth="82.0" style="-fx-border-width: 3; -fx-cursor: hand;" stylesheets="@hoverstyle.css" text="Add" textOverrun="CLIP">
          <font>
             <Font name="Calibri" size="14.0" />
          </font>
@@ -254,6 +255,6 @@
             <Font name="Calibri" size="24.0" />
          </font>
       </Text>
-      <TextField fx:id="subject" layoutX="520.0" layoutY="594.0" prefWidth="156.0" promptText="add subject" style="-fx-background-color: white;" />
+      <TextField fx:id="subject" layoutX="520.0" layoutY="586.0" prefHeight="44.0" prefWidth="156.0" promptText="add subject" style="-fx-background-color: white;" />
    </children>
 </AnchorPane>

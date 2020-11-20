@@ -9,11 +9,8 @@
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
     <jar href="lib\sqlitejdbc-v056.jar" size="2684154" download="eager" />
-    <jar href="newlms.jar" size="575179" download="eager" />
+    <jar href="newlms.jar" size="576780" download="eager" />
   </resources>
-  <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="newlms" >
-    <param name="requiredFXVersion" value="8.0+"/>
-  </applet-desc>
   <jfx:javafx-desc  width="800" height="600" main-class="newlms.NewlmsLogin"  name="newlms" />
   <update check="always"/>
 </jnlp>
