@@ -29,7 +29,7 @@ public class AddCourseController implements Initializable {
     ResultSet rs;
     PreparedStatement pst;
 
-        @FXML
+    @FXML
     private TextField title;
 
     @FXML
@@ -39,26 +39,17 @@ public class AddCourseController implements Initializable {
     private TextField term;
 
     
-
-   
-    
-    
-    
     @FXML
     private void addCourse(ActionEvent event) {
-        System.out.println("ADD COYasSAWSDASDAS");
         conn = ConnectToDB.connect();
-        String query = "Insert into Course(Title, Teacher_ID, Term) values(?,?,?)";
-
+        
         try {
-            pst = conn.prepareStatement(query);
-
+            pst = conn.prepareCall("{call add_course(?,?,?)}");
             pst.setString(1, title.getText());
-            pst.setString(2, teacherID.getText());
+            pst.setInt(2, Integer.parseInt(teacherID.getText()));
             pst.setString(3, term.getText());
-
-            pst.executeUpdate();
-
+            pst.execute();
+            
             JOptionPane.showMessageDialog(null, "New Course Added!");
         } catch (Exception e) {
             e.printStackTrace();

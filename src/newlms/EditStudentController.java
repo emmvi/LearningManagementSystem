@@ -54,18 +54,16 @@ public class EditStudentController implements Initializable {
     @FXML
     void editStudent(ActionEvent event) {
         conn = ConnectToDB.connect();
-        String query = "UPDATE Student SET Name=?, Password=?, Program=?, Batch=? WHERE Student_ID=?";
-
+        
         try {
-            pst = conn.prepareStatement(query);
-
+            pst = conn.prepareCall("{call edit_student(?,?,?,?,?)}");
             pst.setString(1, name.getText());
             pst.setString(2, pw.getText());
             pst.setString(3, program.getText());
             pst.setString(4, batch.getText());
-            pst.setString(5, studentID.getText());
+            pst.setInt(5, Integer.parseInt(studentID.getText()));
             
-            pst.executeUpdate();
+            pst.execute();
 
             JOptionPane.showMessageDialog(null, "Edited Student Details");
         } 
@@ -90,8 +88,8 @@ public class EditStudentController implements Initializable {
         // TODO
     }
 
-    void setCurrentID(String selectedId) {
-        this.studentID.setText(selectedId);
+    void setCurrentID(int selectedId) {
+        this.studentID.setText(""+selectedId);
     }
 
 }

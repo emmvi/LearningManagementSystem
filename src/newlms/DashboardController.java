@@ -32,8 +32,9 @@ public class DashboardController implements Initializable {
     ResultSet rs;
     PreparedStatement pst;
 
-    String user_ID;
+    int user_ID;
     String userType;
+    
     ArrayList<String> courses = new ArrayList<>();
     ArrayList<String> coursesIDs = new ArrayList<>();
     ArrayList<String> coursesNames = new ArrayList<>();
@@ -66,6 +67,7 @@ public class DashboardController implements Initializable {
         FXMLLoader coursesLoader = new FXMLLoader(getClass().getResource("Courses.fxml"));
         Parent coursesRoot = coursesLoader.load();
         CoursesController coursesController = coursesLoader.getController();
+        
         coursesController.setCredentials(this.user_ID, this.userType);
         coursesController.setUserName(this.userName.getText());
         coursesController.setCoursesNames(this.coursesNames);
@@ -86,8 +88,8 @@ public class DashboardController implements Initializable {
         Parent loginRoot = loginLoader.load();
             
         Scene loginScene = new Scene(loginRoot);
-        window.setScene(loginScene);        
-        window.setMaximized(true);
+        window.setScene(loginScene);  
+        window.centerOnScreen();  
     }
     
     @FXML
@@ -107,8 +109,7 @@ public class DashboardController implements Initializable {
     }
     
     
-    public void setUserDetails(String user_ID, String type) throws FileNotFoundException {
-        
+    public void setUserDetails(int user_ID, String type) throws FileNotFoundException {
         this.user_ID = user_ID; 
         this.userType = type;
         
@@ -117,26 +118,22 @@ public class DashboardController implements Initializable {
             Image image = new Image(input);
             this.userIcon.setImage(image);
         }
-        conn = ConnectToDB.connect();
-        String queryName = "Select Name from " + type + " where " + type + "_ID=?";
-        System.out.println(queryName);
-        String queryCourses = "SELECT c.Course_ID, Title FROM Enrollment e JOIN COURSE c on e.Course_ID=c.Course_ID WHERE " + type + "_ID=?";
         
-        if(this.userType.equals("Teacher")) {
-            queryCourses = "SELECT Course_ID, Title from Course join Teacher using (Teacher_ID) where Teacher_ID=?";
-        }
-        
+        conn = ConnectToDB.connect();        
         try {
-            pst = conn.prepareStatement(queryName);
+            pst = conn.prepareCall("{call get_name(?, ?)}");
+            pst.setInt(1, user_ID);
+            pst.setString(2, type);
+            pst.execute();
+            rs = pst.getResultSet();
+            while(rs.next())
+                userName.setText(rs.getString("Name"));
             
-            pst.setString(1, user_ID);
-            rs = pst.executeQuery();
-            userName.setText(rs.getString("Name"));
-            
-            
-            pst = conn.prepareStatement(queryCourses);
-            pst.setString(1, user_ID);
-            rs = pst.executeQuery();
+            pst = conn.prepareCall("{call get_courses_for_user(?, ?)}");
+            pst.setInt(1, user_ID);
+            pst.setString(2, type);
+            pst.execute();
+            rs = pst.getResultSet();
             
             while(rs.next()) {
                 String course_ID = rs.getString("Course_ID");
@@ -144,7 +141,6 @@ public class DashboardController implements Initializable {
                 this.coursesIDs.add(course_ID);
                 this.courses.add(title);
                 this.coursesNames.add(title + "-" + course_ID);
-                
             }
         }
         catch(Exception e) {

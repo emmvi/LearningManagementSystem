@@ -7,8 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,6 +34,7 @@ public class AdminPagesController implements Initializable {
         public void handle(ActionEvent e) { 
             try {
                 addStdentToCourse();
+                refresh();
             } 
             catch (IOException ex) {  
             }
@@ -47,11 +46,11 @@ public class AdminPagesController implements Initializable {
     ResultSet rs;
     PreparedStatement pst;
     
-    String user_ID;
+    int user_ID;
     String[] coursesColumns = { "ID" , "Title", "Teacher", "NumOfStudents"};
     String[] teachersColumns = { "ID" , "Name", "Designation", "Salary"};
     String[] studentsColumns = { "ID" , "Name", "Program", "Batch"};
-    private String selectedId;
+    private Integer selectedId;
     private Button selectedAddButton;
     
     @FXML
@@ -101,8 +100,8 @@ public class AdminPagesController implements Initializable {
         Parent loginRoot = loginLoader.load();
             
         Scene loginScene = new Scene(loginRoot);
-        window.setScene(loginScene);        
-        window.setMaximized(true);
+        window.setScene(loginScene);     
+        window.centerOnScreen();  
     }
     
     /**
@@ -111,39 +110,13 @@ public class AdminPagesController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
                 
-        this.pageTable.setOnMouseClicked(selectEvent);
-//        if(this.pageType.getText().equals("Courses")) {
-        
+        this.pageTable.setOnMouseClicked(selectEvent);        
         
     }    
 
-    void setUserDetails(String id) {
+    void setUserDetails(int id, String name) {
         this.user_ID = id; 
-
-        conn = ConnectToDB.connect();
-        String queryName = "Select Name from Admin where Admin_ID=?";        
-
-        try {
-            pst = conn.prepareStatement(queryName);            
-            pst.setString(1, user_ID);
-            rs = pst.executeQuery();
-            userName.setText(rs.getString("Name"));             
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e);
-        }
-        
-        finally {
-            try{ 
-                rs.close();
-                pst.close();
-                conn.close();
-            }  
-            catch(Exception e) {
-              
-            }
-        }
+        this.userName.setText(name);             
     }
 
     void setPageType(String type) throws IOException {
@@ -209,15 +182,11 @@ public class AdminPagesController implements Initializable {
         
         ObservableList<RowAdminTable> table = FXCollections.observableArrayList();
         conn = ConnectToDB.connect();
-        
-        String coursesQuery = "Select Course_ID, Title, Name from Course join Teacher using (Teacher_ID)";
-        String numOfStudentsQuery = "Select count(*) as NumOfStudents from  Enrollment where Course_ID=?";
-        
+                
         try {
-            pst = conn.prepareStatement(coursesQuery);
-            rs = pst.executeQuery();
-            
-//            String id = 
+            pst = conn.prepareCall("{call get_all_courses()}");
+            pst.execute();
+            rs = pst.getResultSet();
       
             while(rs.next()) {
                 ids.add(rs.getString("Course_ID"));
@@ -227,10 +196,12 @@ public class AdminPagesController implements Initializable {
             
             
             for(int i=0; i<ids.size(); i++) {
-                pst = conn.prepareStatement(numOfStudentsQuery);
+                pst = conn.prepareCall("{call get_numofstudents_in_course(?)}");
                 pst.setString(1, ids.get(i));
-                rs = pst.executeQuery();
-                numbers.add(rs.getString("NumOfStudents"));
+                pst.execute();
+                rs = pst.getResultSet();
+                while(rs.next()) 
+                    numbers.add(rs.getString("NumOfStudents"));
             }
         }
         catch(Exception e) {
@@ -262,9 +233,6 @@ public class AdminPagesController implements Initializable {
         
         setRows();
         col5.setVisible(false);
- 
-        
- 
         pageTable.setItems(getTeachersTable());
     }
     
@@ -272,12 +240,12 @@ public class AdminPagesController implements Initializable {
         
         ObservableList<RowAdminTable> table = FXCollections.observableArrayList();
         conn = ConnectToDB.connect();
-        String teachersQuery = "Select Teacher_ID, Name, Designation, Salary from Teacher";
         
         try {
-            pst = conn.prepareStatement(teachersQuery);
-            rs = pst.executeQuery();
-      
+            pst = conn.prepareCall("{call get_all_teachers()}");
+            pst.execute();
+            rs = pst.getResultSet();
+            
             while(rs.next()) {
                 table.add(new RowAdminTable(rs.getString("Teacher_ID"), rs.getString("Name"), rs.getString("Designation"), rs.getString("Salary")));
             }
@@ -314,12 +282,12 @@ public class AdminPagesController implements Initializable {
     private ObservableList<RowAdminTable> getStudentsTable() {
         ObservableList<RowAdminTable> table = FXCollections.observableArrayList();
         conn = ConnectToDB.connect();
-        String studentsQuery = "select Student_ID, Name, Batch, Program from Student";
         
         try {
-            pst = conn.prepareStatement(studentsQuery);
-            rs = pst.executeQuery();
-      
+            pst = conn.prepareCall("{call get_all_students()}");
+            pst.execute();
+            rs = pst.getResultSet();
+            
             while(rs.next()) {
                 table.add(new RowAdminTable(rs.getString("Student_ID"), rs.getString("Name"), rs.getString("Program"), rs.getString("Batch")));
             }
@@ -393,6 +361,7 @@ public class AdminPagesController implements Initializable {
             AddStudentToCourseController controller = popupLoader.getController();
             System.out.println("ID PICKED IN POPUP FORM " + this.selectedId);
             controller.setCurrentID(this.selectedId);
+            
         }
         else if(controllerType == 2) {
             EditStudentController controller = popupLoader.getController();
@@ -418,25 +387,24 @@ public class AdminPagesController implements Initializable {
     
     
     @FXML
-    public void deleteData() {
+    public void deleteData() throws IOException {
         if(this.selectedId != null) {
             String page = this.pageType.getText();
-            String id = this.selectedId;
-            String table = null;
-            if(page.equals("Courses")) table = "Course";
-            else if(page.equals("Students")) table = "Student";
-            else if(page.equals("Teachers")) table = "Teacher";        
+            int id = this.selectedId;
+            String tableType = null;
+            if(page.equals("Courses")) tableType = "Course";
+            else if(page.equals("Students")) tableType = "Student";
+            else if(page.equals("Teachers")) tableType = "Teacher";        
 
-            String deleteQuery = "Delete from " + table + " where " + table + "_ID=?";
             conn = ConnectToDB.connect();
             System.out.println("Deleting id: " + id);
 
             try {
-                pst = conn.prepareStatement(deleteQuery);  
-
-                pst.setString(1, id);
-                pst.executeUpdate();       
-                JOptionPane.showMessageDialog(null, table + " Deleted!");
+                 pst = conn.prepareCall("{call delete_record(?, ?)}");
+                pst.setInt(1, id);
+                pst.setString(2, tableType);
+                pst.execute();
+                JOptionPane.showMessageDialog(null, tableType + " Deleted!");
             }
             catch(Exception e) {
                 e.printStackTrace();
@@ -457,7 +425,7 @@ public class AdminPagesController implements Initializable {
         else {
             JOptionPane.showMessageDialog(null, "Please click the row you'd like to delete!");
         }
-        
+        refresh();
     }
     
     
@@ -475,15 +443,16 @@ public class AdminPagesController implements Initializable {
     public void setSelectedId() {
         if (this.pageTable.getSelectionModel().getSelectedItem() != null) {
             RowAdminTable selectedRow = this.pageTable.getSelectionModel().getSelectedItem();
-            this.selectedId = selectedRow.getCol1();
+            this.selectedId = Integer.parseInt(selectedRow.getCol1());
             if(this.pageType.getText().equals("Courses")) {
                 this.selectedAddButton = selectedRow.getAdd(); 
                 this.selectedAddButton.setOnAction(addStudentToCourseEvent);
             }
-            
             System.out.println("ID SELECTED:" + selectedId);
         }
-    }
+    }        
     
-        
+    public void refresh() throws IOException {
+        setPageType(pageType.getText());
+    }
 }

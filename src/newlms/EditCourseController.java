@@ -46,16 +46,15 @@ public class EditCourseController implements Initializable {
         
         conn = ConnectToDB.connect();
         String query = "UPDATE Course SET Title=?, term=?, Teacher_ID=?	WHERE Course_ID=?";
-
         try {
-            pst = conn.prepareStatement(query);
-
+            pst = conn.prepareCall("{call edit_course(?,?,?,?)}");
+           
             pst.setString(1, title.getText());
             pst.setString(2, term.getText());
-            pst.setString(3, teacherID.getText());
-            pst.setString(4, currentID.getText());
+            pst.setInt(3, Integer.parseInt(teacherID.getText()));
+            pst.setInt(4, Integer.parseInt(currentID.getText()));
 
-            pst.executeUpdate();
+            pst.execute();
 
             JOptionPane.showMessageDialog(null, "Edited Course Details");
         } catch (Exception e) {
@@ -86,7 +85,8 @@ public class EditCourseController implements Initializable {
         // TODO
     }
 
-    void setCurrentID(String selectedId) {
-        this.currentID.setText(selectedId);
+    void setCurrentID(int selectedId) {
+        this.currentID.setText(""+ selectedId);
     }
+
 }

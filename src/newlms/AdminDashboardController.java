@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package newlms;
 
 import java.io.IOException;
@@ -10,8 +5,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,7 +23,7 @@ public class AdminDashboardController implements Initializable {
     ResultSet rs;
     PreparedStatement pst;
     
-    String user_ID;
+    int user_ID;
     
     @FXML
     private Text userName;
@@ -52,8 +45,8 @@ public class AdminDashboardController implements Initializable {
         Parent loginRoot = loginLoader.load();
             
         Scene loginScene = new Scene(loginRoot);
-        window.setScene(loginScene);        
-        window.setMaximized(true);
+        window.setScene(loginScene);   
+        window.centerOnScreen();  
     }
     
     /**
@@ -64,17 +57,19 @@ public class AdminDashboardController implements Initializable {
         // TODO
     }    
 
-    void setUserDetails(String id) {
+    void setUserDetails(int id) {
         this.user_ID = id; 
 
         conn = ConnectToDB.connect();
-        String queryName = "Select Name from Admin where Admin_ID=?";        
+        
         try {
-            pst = conn.prepareStatement(queryName);
-            
-            pst.setString(1, user_ID);
-            rs = pst.executeQuery();
-            userName.setText(rs.getString("Name"));             
+            pst = conn.prepareCall("{call get_name(?, ?)}");
+            pst.setInt(1, user_ID);
+            pst.setString(2, "Admin");
+            pst.execute();
+            rs = pst.getResultSet();
+            while(rs.next())
+                userName.setText(rs.getString("Name"));             
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -101,7 +96,7 @@ public class AdminDashboardController implements Initializable {
             FXMLLoader adminPageLoader = new FXMLLoader(getClass().getResource("AdminPages.fxml"));
             Parent adminPagesRoot = adminPageLoader.load();
             AdminPagesController adminPageController = adminPageLoader.getController();
-            adminPageController.setUserDetails(this.user_ID);
+            adminPageController.setUserDetails(this.user_ID, this.userName.getText());
             adminPageController.setPageType(type);
 
             Scene adminPagesScene = new Scene(adminPagesRoot);

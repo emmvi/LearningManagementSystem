@@ -18,11 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 
-/**
- * FXML Controller class
- *
- * @author MARYAM
- */
+
 public class AddTeacherController implements Initializable {
 
     Connection conn;
@@ -44,17 +40,16 @@ public class AddTeacherController implements Initializable {
     @FXML
     void addTeacher(ActionEvent event) {
         conn = ConnectToDB.connect();
-        String query = "Insert into Teacher(Name, Password, Designation, Salary) values(?,?,?,?)";
-
+        
         try {
-            pst = conn.prepareStatement(query);
+            pst = conn.prepareCall("{call add_teacher(?,?,?, ?)}");
 
             pst.setString(1, name.getText());
             pst.setString(2, pw.getText());
             pst.setString(3, designation.getText());
-            pst.setString(4, salary.getText());
+            pst.setInt(4, Integer.parseInt(salary.getText()));
 
-            pst.executeUpdate();
+            pst.execute();
 
             JOptionPane.showMessageDialog(null, "New Teacher Added!");
         } catch (Exception e) {

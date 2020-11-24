@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package newlms;
 
 import java.io.IOException;
@@ -29,8 +24,8 @@ import static newlms.NewlmsLogin.window;
 public class LoginController implements Initializable {
 
     Connection conn;
-    ResultSet rs;
     PreparedStatement pst;
+    ResultSet rs;
 
     @FXML
     private TextField userID;
@@ -52,43 +47,42 @@ public class LoginController implements Initializable {
 
     @FXML
     private void loginEvent(ActionEvent event) throws IOException {
-        String val_id = userID.getText();
+        int val_id = Integer.parseInt(userID.getText());
         String val_pw = pw.getText();
         String val_type = (String) comb.getValue();
         System.out.println("ID: " + val_id);
         System.out.println("Password: " + val_pw);
         System.out.println("Type: " + val_type);
 
-        if (validateLogin(val_id, val_pw, val_type)) {
-            if(val_type.equals("Admin")) {
-                openAdminDashboard(val_id);
+        if (validateID(val_id, val_type)) {
+            if(validatePW(val_id, val_pw, val_type)) {
+                if(val_type.equals("Admin")) {
+                    System.out.println("READY TO OPEN ADMIN DASHBOARD");
+                    openAdminDashboard(val_id);
             }
-            else {
-                openNonAdminDashboard(val_id, val_type);
+                else {
+                    System.out.println("READY TO OPEN NON ADMIN DASHBOARD");
+                    openNonAdminDashboard(val_id, val_type);
+                }
             }
         }
     }
 
-    public boolean validateLogin(String id, String pw, String type) {
+    public boolean validateID(int id, String type) {
         conn = ConnectToDB.connect();
-
-        String sql = "Select * from " + type + " where " + type + "_ID" + "=? and Password=?";
-
-        try {
-//            Try to check if id doesn't exist or pw is wrong.
-
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
-            pst.setString(2, pw);
-            rs = pst.executeQuery();
+        System.out.println("conn connected");
+        try {            
+            pst = conn.prepareCall("{call id_exists(?, ?)}");
+            pst.setInt(1, id);
+            pst.setString(2, type);
+            pst.execute();
+            rs = pst.getResultSet();
             
             if (rs.next()) {
-                rs.close();
-                pst.close();
-                System.out.println("Login Successful");
+                System.out.println("ID Exists");
             } 
             else {
-                JOptionPane.showMessageDialog(null, "Incorrect Login Details!");
+                JOptionPane.showMessageDialog(null, "Wrong ID!");
                 return false;
             }
         } 
@@ -99,6 +93,7 @@ public class LoginController implements Initializable {
             try {
                 rs.close();
                 pst.close();
+                conn.close();
             } 
             catch (Exception e) {
 
@@ -107,22 +102,25 @@ public class LoginController implements Initializable {
         return true;
     }
     
-    public void openNonAdminDashboard(String id, String type) throws IOException {
+    public void openNonAdminDashboard(int id, String type) throws IOException {
         FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Parent dashboardRoot = dashboardLoader.load();
         DashboardController dashboardController = dashboardLoader.getController();
+        
         dashboardController.setUserDetails(id, type);
-
+        
         Scene dashboardScene = new Scene(dashboardRoot);
         window.setScene(dashboardScene);
         window.setMaximized(true);
 
     }
     
-    public void openAdminDashboard(String id) throws IOException {
+    public void openAdminDashboard(int id) throws IOException {
         FXMLLoader adminDashboarLoader = new FXMLLoader(getClass().getResource("AdminDashboard.fxml"));
         Parent adminRoot = adminDashboarLoader.load();
         AdminDashboardController adminDashboardController = adminDashboarLoader.getController();
+        
+        
         adminDashboardController.setUserDetails(id);
         adminDashboardController.setPageType(null);
 
@@ -130,6 +128,41 @@ public class LoginController implements Initializable {
         window.setScene(adminDashboardScene);
         window.setMaximized(true);
 
+    }
+
+    private boolean validatePW(int id, String pw, String type) {
+        conn = ConnectToDB.connect();
+        System.out.println("conn connected");
+        try {            
+            pst = conn.prepareCall("{call check_pw(?, ?, ?)}");
+            pst.setInt(1, id);
+            pst.setString(2, pw);
+            pst.setString(3, type);
+            pst.execute();
+            rs = pst.getResultSet();
+            
+            if (rs.next()) {
+                System.out.println("LOGIN SUCCESSFULL");
+            } 
+            else {
+                JOptionPane.showMessageDialog(null, "WRONG PASSWORD!");
+                return false;
+            }
+        } 
+        catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        } 
+        finally {
+            try {
+                rs.close();
+                pst.close();
+                conn.close();
+            } 
+            catch (Exception e) {
+
+            }
+        }
+        return true;
     }
 
 }

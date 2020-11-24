@@ -53,14 +53,14 @@ public class AddStudentController implements Initializable {
         String query = "Insert into Student(Name, Password, Program, Batch) values(?,?,?,?)";       
 
         try {
-            pst = conn.prepareStatement(query);  
-            
+            pst = conn.prepareCall("{call add_student(?,?,?, ?)}");
+
             pst.setString(1, name.getText());
             pst.setString(2, pw.getText());
             pst.setString(3, program.getText());
             pst.setString(4, batch.getText());
             
-            pst.executeUpdate();       
+            pst.execute();       
             
             JOptionPane.showMessageDialog(null, "New Student Added!");
         }

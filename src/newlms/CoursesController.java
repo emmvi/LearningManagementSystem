@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package newlms;
 
 import java.io.FileInputStream;
@@ -12,7 +7,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -45,7 +39,7 @@ public class CoursesController implements Initializable {
     ResultSet rs;
     PreparedStatement pst;
 
-    String user_ID;
+    int user_ID;
     String userType;
     ArrayList<String> coursesNames = new ArrayList<>();
     
@@ -99,19 +93,14 @@ public class CoursesController implements Initializable {
     }
 
     @FXML
-    private void goToCalendar(ActionEvent event) throws IOException {
-        
-    }
-    
-    @FXML
     void logoutEvent(ActionEvent event) throws IOException {
         System.out.println("LOGOUT EVENT INVOKED FROM DASHBOARD!");
         FXMLLoader loginLoader = new FXMLLoader(getClass().getResource("Login.fxml"));
         Parent loginRoot = loginLoader.load();
             
         Scene loginScene = new Scene(loginRoot);
-        window.setScene(loginScene);        
-        window.setMaximized(true);
+        window.setScene(loginScene); 
+        window.centerOnScreen();  
     }
 
     @FXML
@@ -146,7 +135,7 @@ public class CoursesController implements Initializable {
         window.setMaximized(true);
     }
     
-    public void openDashboard(String val_id, String val_type) throws IOException {
+    public void openDashboard(int val_id, String val_type) throws IOException {
         FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Parent dashboardRoot = dashboardLoader.load();
         DashboardController dashboardController = dashboardLoader.getController();
@@ -158,7 +147,7 @@ public class CoursesController implements Initializable {
     }
 
  
-    void setCredentials(String id, String type) throws FileNotFoundException {
+    void setCredentials(int id, String type) throws FileNotFoundException {
         this.user_ID = id;
         this.userType = type;
         
@@ -238,16 +227,14 @@ public class CoursesController implements Initializable {
         
         ObservableList<RowStudentTable> announcements = FXCollections.observableArrayList();
         conn = ConnectToDB.connect();
-        String query = "Select Course_ID, Title, Name, Term, count(*) as NumOfStudents from Teacher join Course using (Teacher_ID) join Enrollment using (Course_ID) where Course_ID=? GROUP by Course_ID";
         
         try {
             for(int i=0; i<this.coursesNames.size(); i++) {
-                pst = conn.prepareStatement(query);
-                String id = coursesNames.get(i).split("-", 2)[1];
-                System.out.println("ID FOR COURSE: " + id);
-                pst.setString(1, id);
-            
-                rs = pst.executeQuery();
+                pst = conn.prepareCall("{call get_course_details(?)}");
+                int id = Integer.parseInt(coursesNames.get(i).split("-", 2)[1]);
+                pst.setInt(1, id);
+                pst.execute();
+                rs = pst.getResultSet();
                 while(rs.next()) {
                     announcements.add(new RowStudentTable(rs.getString("Course_ID"), rs.getString("Title"), rs.getString("Name"), rs.getString("Term"), rs.getString("NumOfStudents")));
                 }

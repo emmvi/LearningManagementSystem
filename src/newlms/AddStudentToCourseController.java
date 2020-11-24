@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package newlms;
 
 import java.net.URL;
@@ -17,11 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javax.swing.JOptionPane;
 
-/**
- * FXML Controller class
- *
- * @author MARYAM
- */
+
 public class AddStudentToCourseController implements Initializable {
 
     Connection conn;
@@ -31,20 +22,18 @@ public class AddStudentToCourseController implements Initializable {
     @FXML
     private TextField studentID;
     
-    private String courseID;
+    private int courseID;
 
     @FXML
     void addStudentToCourse(ActionEvent event) {
         conn = ConnectToDB.connect();
-        String query = "Insert into Enrollment(Student_ID, Course_ID) values(?,?)";
-
+        
         try {
-            pst = conn.prepareStatement(query);
+            pst = conn.prepareCall("{call add_std_to_course(?,?)}");
+            pst.setInt(1, Integer.parseInt(studentID.getText()));
+            pst.setInt(2, courseID);
 
-            pst.setString(1, studentID.getText());
-            pst.setString(2, courseID);
-
-            pst.executeUpdate();
+            pst.execute();
 
             JOptionPane.showMessageDialog(null, "Student Added to Course!");
         } catch (Exception e) {
@@ -76,7 +65,7 @@ public class AddStudentToCourseController implements Initializable {
         // TODO
     }
 
-    void setCurrentID(String selectedId) {
+    void setCurrentID(int selectedId) {
        this.courseID = selectedId;
     }
 

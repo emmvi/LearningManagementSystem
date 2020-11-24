@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package newlms;
 
 import java.io.ByteArrayOutputStream;
@@ -15,7 +10,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -51,13 +45,13 @@ public class CourseContentController implements Initializable {
     ResultSet rs;
     PreparedStatement pst;
 
-    String user_ID;
+    int user_ID;
     String userType;
     ArrayList<String> coursesNames = new ArrayList<>();
     String course_ID;
     String courseName;
     byte[] uploadedFileBytes;
-    private String selectedId;
+    private Integer selectedId;
     
     @FXML
     private TableColumn<RowContent, String> idCol;
@@ -126,10 +120,6 @@ public class CourseContentController implements Initializable {
         window.setScene(dashboardScene);        
         window.setMaximized(true);
     }
-    @FXML
-    void goToCalendar(ActionEvent event) {
-
-    }
     
     @FXML
     void logoutEvent(ActionEvent event) throws IOException {
@@ -138,8 +128,8 @@ public class CourseContentController implements Initializable {
         Parent loginRoot = loginLoader.load();
             
         Scene loginScene = new Scene(loginRoot);
-        window.setScene(loginScene);        
-        window.setMaximized(true);
+        window.setScene(loginScene);
+        window.centerOnScreen();  
     }
 
     @FXML
@@ -172,6 +162,7 @@ public class CourseContentController implements Initializable {
         System.out.println("Add clicked");
         if(subject.getText() != null) {
             addContent(subject.getText());
+            refresh();
         }
         else {
             JOptionPane.showMessageDialog(null, "Please Provide Subject");   
@@ -192,7 +183,7 @@ public class CourseContentController implements Initializable {
     }
     
     
-    public void setCredentials(String id, String type) throws FileNotFoundException {
+    public void setCredentials(int id, String type) throws FileNotFoundException {
         this.user_ID = id;
         this.userType = type;
         
@@ -307,33 +298,21 @@ public class CourseContentController implements Initializable {
         
         ObservableList<RowContent> rows = FXCollections.observableArrayList();
         conn = ConnectToDB.connect();
-        String normalContentQuery = "SELECT Content_ID, Subject, Author, Date_Uploaded from Content where Course_ID=? and Content_Type=?";
-        String studentDropboxQuery = "SELECT Content_ID, Subject, Author, Date_Uploaded from Content where Course_ID=? and Content_Type=? and Student_ID=?";
         
         try {
-            if(type.equals("Dropbox") && this.userType.equals("Student")) {
-                pst = conn.prepareStatement(studentDropboxQuery);
-                pst.setString(1, this.course_ID);
-                pst.setString(2, type);
-                pst.setString(3, this.user_ID);
-                
-                rs = pst.executeQuery();
-                while(rs.next()) {
-                    rows.add(new RowContent(rs.getString("Content_ID"), rs.getString("Subject"), rs.getString("Author"), rs.getString("Date_Uploaded")));
-                }
-            }
-            else {
-                pst = conn.prepareStatement(normalContentQuery);
-                pst.setString(1, this.course_ID);
-                pst.setString(2, type);
-                
-                
-                rs = pst.executeQuery();
-                while(rs.next()) {
-                    rows.add(new RowContent(rs.getString("Content_ID"), rs.getString("Subject"), rs.getString("Author"), rs.getString("Date_Uploaded")));
-                }
+            pst = conn.prepareCall("{call get_course_content(?, ?, ?, ?)}");
+            pst.setInt(1, Integer.parseInt(this.course_ID));
+            pst.setString(2, type);
+            pst.setInt(3, this.user_ID);
+            pst.setString(4, this.userType);
+            pst.execute();
+            rs = pst.getResultSet();
 
+            while(rs.next()) {
+                rows.add(new RowContent(rs.getString("Content_ID"), rs.getString("Content_Subject"), rs.getString("Author"), rs.getString("Date_Uploaded")));
             }
+
+//            }
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -354,7 +333,7 @@ public class CourseContentController implements Initializable {
     
     
    
-    public void openDashboard(String val_id, String val_type) throws IOException {
+    public void openDashboard(int val_id, String val_type) throws IOException {
         FXMLLoader dashboardLoader = new FXMLLoader(getClass().getResource("Dashboard.fxml"));
         Parent dashboardRoot = dashboardLoader.load();
         DashboardController dashboardController = dashboardLoader.getController();
@@ -394,26 +373,21 @@ public class CourseContentController implements Initializable {
 
 
         conn = ConnectToDB.connect();
-        String queryAddContent = null; 
-        if(this.userType.equals("Teacher")) {
-            queryAddContent = "Insert into Content (Content_Type, Course_ID, Subject, File_Uploaded, Teacher_ID, Author) values (?,?,?,?,?, ?)";
-        }
-        else {
-            queryAddContent = "Insert into Content (Content_Type, Course_ID, Subject, File_Uploaded, Student_ID, Author) values (?,?,?,?,?,?)";
-        }
-            
+                    
         try {
-            pst = conn.prepareStatement(queryAddContent);
-            System.out.println("Bytes Value: " + this.uploadedFileBytes);
-            
+            if(this.userType.equals("Teacher")) {
+                pst = conn.prepareCall("{call add_content_teacher(?,?,?,?,?,?)}");
+            }
+            else {
+               pst = conn.prepareCall("{call add_content_student(?,?,?,?,?,?)}");
+            }
             pst.setString(1, this.contentType.getText());
-            pst.setString(2, this.course_ID);
+            pst.setInt(2, Integer.parseInt(this.course_ID));
             pst.setString(3, subject);
             pst.setBytes(4, this.uploadedFileBytes);
-            pst.setString(5, this.user_ID);
+            pst.setInt(5, this.user_ID);
             pst.setString(6, this.userName.getText());
-
-            pst.executeUpdate();
+            pst.execute();
             
             JOptionPane.showMessageDialog(null, "WOHOOOOOO! FILE UPLOADED");
         }
@@ -440,11 +414,13 @@ public class CourseContentController implements Initializable {
         String getFile = "Select File_Uploaded from Content where Content_ID=?";
         
         try {
-            pst = conn.prepareStatement(getFile);
-            pst.setString(1, this.selectedId);
-            rs = pst.executeQuery();
-            fileBytes = rs.getBytes("File_Uploaded");    
-            
+            pst = conn.prepareCall("{call download_content(?)}");
+            pst.setInt(1, user_ID);
+            pst.execute();
+            rs = pst.getResultSet();
+            while(rs.next())
+                fileBytes = rs.getBytes("File_Uploaded");    
+                
         }
         
         catch(Exception e) {
@@ -484,14 +460,15 @@ public class CourseContentController implements Initializable {
     
     public void getCurrentTerm(String id) {
         conn = ConnectToDB.connect();
-        String contentQuery = "Select Term from Course where Course_ID=?";
         
         try {
-            
-            pst = conn.prepareStatement(contentQuery);
-            pst.setString(1, course_ID);
-            rs = pst.executeQuery();
-            this.currentTerm.setText(rs.getString("Term"));
+            pst = conn.prepareCall("{call get_course_term(?)}");
+            pst.setInt(1, Integer.parseInt(this.course_ID));
+            pst.execute();
+            rs = pst.getResultSet();
+            while(rs.next()) {
+                this.currentTerm.setText(rs.getString("Term"));
+            }
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -522,9 +499,13 @@ public class CourseContentController implements Initializable {
     public void setSelectedId() {
         if (this.contentTable.getSelectionModel().getSelectedItem() != null) {
             RowContent selectedRow = this.contentTable.getSelectionModel().getSelectedItem();
-            this.selectedId = selectedRow.getId();
+            this.selectedId = Integer.parseInt(selectedRow.getId());
             
             System.out.println("ID SELECTED:" + selectedId);
         }
+    }
+    
+    public void refresh() {
+        setContent(contentType.getText());
     }
 }
