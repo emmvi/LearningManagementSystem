@@ -6,14 +6,14 @@ The LMS has 3 different views: Teacher, Student and Admin.
 
 <div>A student can:
 <li> Access the courses they are enrolled in.</li> 
-<li> Read/Download all the different contents of a course like Syllabus, Announcements, Assignments etc. </li> 
-<li> AUpload files to the dropbox of a particular course.</li>
+<li> Read/Download all the different contents of a course(that they are enrolled in) like Syllabus, Announcements, Assignments etc. </li> 
+<li> Upload files to the dropbox of a particular course(that they are enrolled in).</li>
 </div>
 <br>
 
 <div>A teacher can:
 <li> Access the courses they are teaching.</li> 
-<li> Read/Download and Upload all the different contents of a course like Syllabus, Announcements, Assignments etc. </li> 
+<li> Read/Download and Upload all the different contents of a course(that they are teaching) like Syllabus, Announcements, Assignments etc. </li> 
 </div>
 <br>
 
