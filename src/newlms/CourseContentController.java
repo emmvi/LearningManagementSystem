@@ -129,7 +129,7 @@ public class CourseContentController implements Initializable {
             
         Scene loginScene = new Scene(loginRoot);
         window.setScene(loginScene);
-        window.centerOnScreen();  
+        //window.centerOnScreen();  
     }
 
     @FXML
@@ -211,36 +211,36 @@ public class CourseContentController implements Initializable {
         System.out.println(n);
         
         if (n >= 5) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
-            course3.setText(names.get(n-3));
-            course4.setText(names.get(n-4));
-            course5.setText(names.get(n-5));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
+            course3.setText(names.get(2));
+            course4.setText(names.get(3));
+            course5.setText(names.get(4));
         }
         
         else if(n == 4) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
-            course3.setText(names.get(n-3));
-            course4.setText(names.get(n-4));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
+            course3.setText(names.get(2));
+            course4.setText(names.get(3));
             course5.setVisible(false);
         }
         else if(n == 3) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
-            course3.setText(names.get(n-3));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
+            course3.setText(names.get(2));
             course4.setVisible(false);
             course5.setVisible(false);
         }
         else if(n == 2) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
             course3.setVisible(false);
             course4.setVisible(false);
             course5.setVisible(false);
         }
         else if(n == 1) {
-            course1.setText(names.get(n-1));
+            course1.setText(names.get(0));
             course2.setVisible(false);
             course3.setVisible(false);
             course4.setVisible(false);
@@ -415,7 +415,7 @@ public class CourseContentController implements Initializable {
         
         try {
             pst = conn.prepareCall("{call download_content(?)}");
-            pst.setInt(1, user_ID);
+            pst.setInt(1,this.selectedId);
             pst.execute();
             rs = pst.getResultSet();
             while(rs.next())
@@ -445,7 +445,7 @@ public class CourseContentController implements Initializable {
         
         try {
             FileOutputStream fos = new FileOutputStream(file);
-             
+             System.out.println("BYTES " + fileBytes);
             // Writes bytes from the specified byte array to this file output stream 
             fos.write(fileBytes);
             JOptionPane.showMessageDialog(null, "WOHOOOOOO! FILE SAVED");

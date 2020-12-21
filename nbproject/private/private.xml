@@ -3,10 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Dell/Documents/NetBeansProjects/LearningManagementSystem/src/newlms/NewlmsLogin.java</file>
-            <file>file:/C:/Users/Dell/Documents/NetBeansProjects/LearningManagementSystem/src/newlms/AdminPagesController.java</file>
-            <file>file:/C:/Users/Dell/Documents/NetBeansProjects/LearningManagementSystem/src/newlms/LoginController.java</file>
-            <file>file:/C:/Users/Dell/Documents/NetBeansProjects/LearningManagementSystem/src/newlms/CourseContentController.java</file>
+            <file>file:/C:/Users/MARYAM/Desktop/LearningManagementSystem/src/newlms/DashboardController.java</file>
+            <file>file:/C:/Users/MARYAM/Desktop/LearningManagementSystem/src/newlms/CourseContentController.java</file>
+            <file>file:/C:/Users/MARYAM/Desktop/LearningManagementSystem/src/newlms/AddCourseController.java</file>
+            <file>file:/C:/Users/MARYAM/Desktop/LearningManagementSystem/src/newlms/AddStudentToCourseController.java</file>
+            <file>file:/C:/Users/MARYAM/Desktop/LearningManagementSystem/src/newlms/CoursesController.java</file>
+            <file>file:/C:/Users/MARYAM/Desktop/LearningManagementSystem/src/newlms/LoginController.java</file>
         </group>
     </open-files>
 </project-private>

@@ -101,7 +101,7 @@ public class AdminPagesController implements Initializable {
             
         Scene loginScene = new Scene(loginRoot);
         window.setScene(loginScene);     
-        window.centerOnScreen();  
+        //window.centerOnScreen();  
     }
     
     /**

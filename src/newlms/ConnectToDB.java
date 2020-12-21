@@ -9,7 +9,7 @@ public class ConnectToDB {
     public static Connection connect() {
         System.out.println("ISNIDE CONNECT METHOD");
         String username = "root";
-        String pw = "1234";
+        String pw = "password";
         String url = "jdbc:mysql://localhost:3306/lmsdb";
         try {
             Connection connection = DriverManager.getConnection(url, username, pw);

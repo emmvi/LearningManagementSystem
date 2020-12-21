@@ -100,7 +100,7 @@ public class CoursesController implements Initializable {
             
         Scene loginScene = new Scene(loginRoot);
         window.setScene(loginScene); 
-        window.centerOnScreen();  
+        //window.centerOnScreen();  
     }
 
     @FXML
@@ -168,36 +168,36 @@ public class CoursesController implements Initializable {
         System.out.println(n);
         
         if (n >= 5) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
-            course3.setText(names.get(n-3));
-            course4.setText(names.get(n-4));
-            course5.setText(names.get(n-5));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
+            course3.setText(names.get(2));
+            course4.setText(names.get(3));
+            course5.setText(names.get(4));
         }
         
         else if(n == 4) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
-            course3.setText(names.get(n-3));
-            course4.setText(names.get(n-4));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
+            course3.setText(names.get(2));
+            course4.setText(names.get(3));
             course5.setVisible(false);
         }
         else if(n == 3) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
-            course3.setText(names.get(n-3));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
+            course3.setText(names.get(2));
             course4.setVisible(false);
             course5.setVisible(false);
         }
         else if(n == 2) {
-            course1.setText(names.get(n-1));
-            course2.setText(names.get(n-2));
+            course1.setText(names.get(0));
+            course2.setText(names.get(1));
             course3.setVisible(false);
             course4.setVisible(false);
             course5.setVisible(false);
         }
         else if(n == 1) {
-            course1.setText(names.get(n-1));
+            course1.setText(names.get(0));
             course2.setVisible(false);
             course3.setVisible(false);
             course4.setVisible(false);
